@@ -9,55 +9,37 @@ import sys
 # counts = pd.read_csv("count_matrix.csv").head()
 
 in_names = pd.read_csv("peak_names_out.csv", header = None, chunksize = 500)
-in_counts = pd.read_csv("count_matrix.csv", chunksize = 500)
-counts = pd.concat(in_counts, ignore_index=True)
+in_names
+in_counts = pd.read_csv("count_matrix.csv", chunksize = 2000)
+chunk_list = []
+for chunk in in_counts:
+    chunk_list.append(chunk)
+
+counts = pd.concat(chunk_list, ignore_index=True)
 names = pd.concat(in_names, ignore_index=True)
 data = pd.merge(names, counts, left_index= True, right_index= True)
 
-split_names = []
+clean_data = data.dropna(axis=0)
+clean_data.rename(columns = {0 : "gene"}, inplace = True)
 
-string = "hg19_chr1:713971-714221"
-human = "hg19"
-mouse = "mm10"
-string.split("_")
-names[0]
-type(string)
+human = clean_data[clean_data["gene"].str.contains( "hg19_" )]
+mouse = clean_data[clean_data["gene"].str.contains( "mm10_" )]
 
-if human in string:
-    print("Found")
-else:
-    print("Not found")
+hcols = len(human.columns)
 
-human_data = pd.DataFrame()
-mouse_data = pd.DataFrame()
+df1 = human.melt(var_name = "columns", value_name = "index")
+df1
+df2 = pd.crosstab(index = df1['index'], columns = df1['columns'])
+df2
+# human_counts = human.apply(pd.value_counts)
+# human.apply(lambda x: x.value_counts())
+test = pd.concat([human[column].value_counts() for column in human], axis = 1)
+test = human.groupby(human.columns).size()
 
-for name in names[0]:
-    split_names.append(name.split("_"))
+human_counts = pd.DataFrame(columns = ["values", "counts"])
+for i in range(hcols):
+    iter = human.iloc[:,i].value_counts()
+    test = pd.merge(human_counts, iter, left_index=True, right_index=True)
 
-split_names
-
-for name in names[0]:
-    if human in name:
-        human_data.append(human)
-    elif mouse in name:
-        mouse_data.append(mouse)
-
-.split("_")
-data = pd.merge(names, counts, left_index = True, right_index = True)
-
-has1 = data.iloc[:, 1:-1] == 1
-data[has1]
-hasmore = data.iloc[:, 0] >= 2
-more_than1 = data[hasmore]
-
-plt.scatter(more_than1.index, more_than1[:, 0])
-plt.show()
-
-# iterate through each row to get the total number of droplets with
-# 1 transcript
-has_1 = pd.DataFrame()
-for row in data.index:
-    has_1.append(data[data.iloc[row, :] == 1])
-    row += 1 
-
-
+test = human.iloc[:,1].value_counts()
+test
