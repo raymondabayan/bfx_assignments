@@ -27,19 +27,21 @@ mouse = clean_data[clean_data["gene"].str.contains( "mm10_" )]
 
 hcols = len(human.columns)
 
-df1 = human.melt(var_name = "columns", value_name = "index")
-df1
-df2 = pd.crosstab(index = df1['index'], columns = df1['columns'])
-df2
+# df1 = human.melt(var_name = "columns", value_name = "values")
+# df1
+# df2 = pd.crosstab(index = df1['values'], columns = df1['columns'])
+# df2
 # human_counts = human.apply(pd.value_counts)
 # human.apply(lambda x: x.value_counts())
-test = pd.concat([human[column].value_counts() for column in human], axis = 1)
-test = human.groupby(human.columns).size()
-
-human_counts = pd.DataFrame(columns = ["values", "counts"])
+# test = pd.concat([human[column].value_counts() for column in human], axis = 1)
+# test = human.groupby(human.columns).size()
+human_counts = []
 for i in range(hcols):
     iter = human.iloc[:,i].value_counts()
-    test = pd.merge(human_counts, iter, left_index=True, right_index=True)
+    human_counts.append(iter)
+    # pd.merge(human_counts, iter, left_index=True, right_index=True)
+newdf = pd.DataFrame()
+for col in range(hcols):
+    iter = newdf.iloc[:, col].value_counts()
+    newdf = newdf + iter
 
-test = human.iloc[:,1].value_counts()
-test
